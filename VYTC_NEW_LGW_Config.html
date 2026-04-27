@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VYTC LGW Config Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e3a5f;
+    --accent: #00d4ff;
+    --accent2: #0066ff;
+    --warn: #ff6b35;
+    --success: #00e5a0;
+    --text: #e2eaf8;
+    --muted: #4a6fa5;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .page-wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+  header { margin-bottom: 48px; }
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 10px;
+    margin-bottom: 16px;
+    border-radius: 2px;
+    background: rgba(0,212,255,0.05);
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 15px;
+    font-family: var(--mono);
+    letter-spacing: 0.02em;
+  }
+  .form-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    width: 28px;
+    height: 28px;
+    background: var(--accent2);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .section-num.new { background: var(--warn); }
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .section-desc {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+  .fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+  }
+  .field-cell {
+    background: var(--surface);
+    padding: 20px 24px;
+  }
+  .field-cell.empty { background: var(--surface); }
+  label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .field-hint {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    margin-top: -4px;
+  }
+  input[type="text"], input[type="password"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input[type="text"]:focus, input[type="password"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,212,255,0.1);
+  }
+  input::placeholder { color: var(--muted); opacity: 0.5; }
+  input.filled { border-color: var(--success); color: var(--success); }
+  .actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+  button {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    padding: 14px 32px;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(0,212,255,0.3); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--muted); color: var(--text); }
+  .btn-copy {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    font-size: 12px;
+    padding: 8px 16px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .btn-copy:hover { background: rgba(0,212,255,0.1); }
+  .output-section { margin-top: 40px; display: none; }
+  .output-section.visible { display: block; }
+  .output-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .output-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--success);
+  }
+  .output-box {
+    background: #060a12;
+    border: 1px solid var(--success);
+    border-radius: 6px;
+    padding: 24px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.7;
+    color: #b0f0d8;
+    overflow-x: auto;
+    white-space: pre;
+    max-height: 600px;
+    overflow-y: auto;
+    box-shadow: 0 0 40px rgba(0,229,160,0.05);
+  }
+  .output-box::-webkit-scrollbar { width: 6px; height: 6px; }
+  .output-box::-webkit-scrollbar-track { background: #060a12; }
+  .output-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 2px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+  .progress-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: var(--success);
+    color: #000;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 12px 20px;
+    border-radius: 4px;
+    transform: translateY(-80px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 999;
+    letter-spacing: 0.05em;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  @media (max-width: 640px) {
+    .fields-grid { grid-template-columns: 1fr; }
+    .section-desc { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+  <header>
+    <div class="badge">Cisco IOS · CUBE Config</div>
+    <h1>VEYTEC LGW Config Generator</h1>
+    <p class="subtitle">// Fill in the parameters below to generate your Local Gateway script</p>
+  </header>
+
+  <div class="progress-label">
+    <span>Fields Completed</span>
+    <span id="progress-count">0 / 25</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+
+  <!-- Section 0: Initial Config (NEW) -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num new">00</div>
+      <span class="section-title">Initial Device Configuration</span>
+      <span class="section-desc">hostname · routing · mgmt</span>
+    </div>
+    <div class="fields-grid">
+      <div class="field-cell">
+        <label for="hostname">Hostname</label>
+        <div class="field-hint">Router hostname</div>
+        <input type="text" id="hostname" placeholder="e.g. VYTC-LGW-01" data-var="HOSTNAME">
+      </div>
+      <div class="field-cell">
+        <label for="domain-name">Domain Name</label>
+        <div class="field-hint">IP domain name</div>
+        <input type="text" id="domain-name" placeholder="e.g. company.local" data-var="DOMAIN_NAME">
+      </div>
+      <div class="field-cell">
+        <label for="dns1">Primary DNS</label>
+        <div class="field-hint">First name-server IP</div>
+        <input type="text" id="dns1" placeholder="e.g. 8.8.8.8" data-var="DNS1">
+      </div>
+      <div class="field-cell">
+        <label for="dns2">Secondary DNS</label>
+        <div class="field-hint">Second name-server IP</div>
+        <input type="text" id="dns2" placeholder="e.g. 8.8.4.4" data-var="DNS2">
+      </div>
+      <div class="field-cell">
+        <label for="mgmt-iface">Management Interface</label>
+        <div class="field-hint">Interface for mgmt IP</div>
+        <input type="text" id="mgmt-iface" placeholder="e.g. GigabitEthernet0/0" data-var="MANAGEMENT_INTERFACE">
+      </div>
+      <div class="field-cell">
+        <label for="ip-address">IP Address</label>
+        <div class="field-hint">Management IP address</div>
+        <input type="text" id="ip-address" placeholder="e.g. 10.0.0.10" data-var="IP_ADDRESS">
+      </div>
+      <div class="field-cell">
+        <label for="subnet-mask">Subnet Mask</label>
+        <div class="field-hint">Management subnet mask</div>
+        <input type="text" id="subnet-mask" placeholder="e.g. 255.255.255.0" data-var="SUBNET_MASK">
+      </div>
+      <div class="field-cell">
+        <label for="default-gw">Default Gateway</label>
+        <div class="field-hint">Default route next-hop</div>
+        <input type="text" id="default-gw" placeholder="e.g. 10.0.0.1" data-var="DEFAULT_GATEWAY">
+      </div>
+      <div class="field-cell">
+        <label for="route-ip">Static Route IP</label>
+        <div class="field-hint">Additional static route destination</div>
+        <input type="text" id="route-ip" placeholder="e.g. 192.168.0.0" data-var="ROUTE_IP">
+      </div>
+      <div class="field-cell">
+        <label for="route-subnet">Static Route Subnet</label>
+        <div class="field-hint">Additional static route mask</div>
+        <input type="text" id="route-subnet" placeholder="e.g. 255.255.0.0" data-var="ROUTE_SUBNET">
+      </div>
+      <div class="field-cell">
+        <label for="route-gw">Static Route Gateway</label>
+        <div class="field-hint">Additional static route next-hop</div>
+        <input type="text" id="route-gw" placeholder="e.g. 10.0.0.1" data-var="ROUTE_GATEWAY">
+      </div>
+      <div class="field-cell empty"></div>
+    </div>
+  </div>
+
+  <!-- Section 1: Local Account & SSH -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num new">01</div>
+      <span class="section-title">Local Account &amp; SSH</span>
+      <span class="section-desc">username · vty</span>
+    </div>
+    <div class="fields-grid">
+      <div class="field-cell">
+        <label for="cube-username">CUBE Username</label>
+        <div class="field-hint">Local privileged account name</div>
+        <input type="text" id="cube-username" placeholder="e.g. cube-admin" data-var="CUBE_USERNAME">
+      </div>
+      <div class="field-cell">
+        <label for="secret">Secret</label>
+        <div class="field-hint">Scrypt hashed enable secret</div>
+        <input type="password" id="secret" placeholder="••••••••••••" data-var="SECRET">
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: WxC Credentials -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <span class="section-title">Webex Calling Credentials</span>
+      <span class="section-desc">tenant 200 auth</span>
+    </div>
+    <div class="fields-grid">
+      <div class="field-cell">
+        <label for="username">Username</label>
+        <div class="field-hint">WxC trunk username</div>
+        <input type="text" id="username" placeholder="e.g. LGW12345678910_LGU" data-var="USERNAME">
+      </div>
+      <div class="field-cell">
+        <label for="password">Password</label>
+        <div class="field-hint">WxC trunk password</div>
+        <input type="password" id="password" placeholder="••••••••••••" data-var="PASSWORD">
+      </div>
+      <div class="field-cell">
+        <label for="line-port">Line / Port</label>
+        <div class="field-hint">Line/Port username only</div>
+        <input type="text" id="line-port" placeholder="e.g. LGW10987654321_LGU" data-var="LINE/PORT">
+      </div>
+      <div class="field-cell">
+        <label for="registrar">Registrar Domain</label>
+        <div class="field-hint">WxC SIP registrar &amp; SIP server</div>
+        <input type="text" id="registrar" placeholder="e.g. 26436723.us10.bcld.webex.com" data-var="REGISTRAR DOMAIN">
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Trunk & Routing -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <span class="section-title">Trunk &amp; Routing</span>
+      <span class="section-desc">sip-profiles 200 · uri 200</span>
+    </div>
+    <div class="fields-grid">
+      <div class="field-cell">
+        <label for="otg-dtg">Trunk Group OTG/DTG</label>
+        <div class="field-hint">Trunk Group OTG/DTG</div>
+        <input type="text" id="otg-dtg" placeholder="e.g. dallas454451144_lgu" data-var="OTG_DTG">
+      </div>
+      <div class="field-cell">
+        <label for="outbound-proxy">Outbound Proxy Address</label>
+        <div class="field-hint">WxC outbound proxy FQDN</div>
+        <input type="text" id="outbound-proxy" placeholder="dfw36.sipconnect-us.bcld.webex.com" data-var="OUTBOUND PROXY ADDRESS">
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Network Interfaces -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <span class="section-title">Voice Network Interfaces</span>
+      <span class="section-desc">bind control/media</span>
+    </div>
+    <div class="fields-grid">
+      <div class="field-cell">
+        <label for="webex-iface">Webex Interface</label>
+        <div class="field-hint">Interface facing Webex Calling (tenant 200)</div>
+        <input type="text" id="webex-iface" placeholder="e.g. GigabitEthernet0/0/1" data-var="WEBEX INTERFACE">
+      </div>
+      <div class="field-cell">
+        <label for="cucm-iface">CUCM Interface</label>
+        <div class="field-hint">Interface facing UCM (tenant 100/300)</div>
+        <input type="text" id="cucm-iface" placeholder="e.g. GigabitEthernet0/0/0" data-var="CUCM INTERFACE">
+      </div>
+      <div class="field-cell">
+        <label for="pstn-iface">PSTN Interface</label>
+        <div class="field-hint">Interface facing IP PSTN (tenant 150/350)</div>
+        <input type="text" id="pstn-iface" placeholder="e.g. GigabitEthernet0/0/2" data-var="PSTN INTERFACE">
+      </div>
+      <div class="field-cell empty"></div>
+    </div>
+  </div>
+
+  <!-- Section 5: Server IPs -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <span class="section-title">Server IP Addresses</span>
+      <span class="section-desc">server-groups · uri · dial-peers</span>
+    </div>
+    <div class="fields-grid">
+      <div class="field-cell">
+        <label for="pstn-ip">PSTN IP</label>
+        <div class="field-hint">IP of ITSP / PSTN gateway</div>
+        <input type="text" id="pstn-ip" placeholder="e.g. 203.0.113.10" data-var="PSTN IP">
+      </div>
+      <div class="field-cell empty"></div>
+      <div class="field-cell">
+        <label for="cucm-pub">CUCM Publisher IP</label>
+        <div class="field-hint">Primary CUCM node</div>
+        <input type="text" id="cucm-pub" placeholder="e.g. 10.10.1.10" data-var="CUCM PUB">
+      </div>
+      <div class="field-cell">
+        <label for="cucm-sub">CUCM Subscriber IP</label>
+        <div class="field-hint">Secondary CUCM node</div>
+        <input type="text" id="cucm-sub" placeholder="e.g. 10.10.1.11" data-var="CUCM SUB">
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn-primary" onclick="generateConfig()">⚡ Generate Config</button>
+    <button class="btn-secondary" onclick="clearForm()">Clear All</button>
+  </div>
+
+  <div class="output-section" id="output-section">
+    <div class="output-header">
+      <span class="output-title">✓ Generated Configuration</span>
+      <button class="btn-copy" onclick="copyConfig()">Copy to Clipboard</button>
+    </div>
+    <pre class="output-box" id="output-box"></pre>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copied to clipboard!</div>
+
+<script>
+const TEMPLATE = `!<------Initial Configuration------------>
+hostname __HOSTNAME__
+!
+ip domain name __DOMAIN_NAME__
+!
+ip name-server __DNS1__ __DNS2__
+!
+int __MGMT_IFACE__
+ip address __IP_ADDRESS__ __SUBNET_MASK__
+no shut
+!
+ip route 0.0.0.0 0.0.0.0 __DEFAULT_GW__
+ip route __ROUTE_IP__ __ROUTE_SUBNET__ __ROUTE_GW__}
+!
+crypto key generate rsa
+!
+!
+!<------Create local account------------>
+username __CUBE_USERNAME__ privilege 15 algorithm-type scrypt secret __SECRET__
+!
+!<------Set ssh console access------------>
+line vty 0 4
+transport input ssh
+login local
+exit
+!
+!<------Config Key Password------------>
+key config-key password-encrypt <Client-ipt1!>
+password encryption aes
+!
+!
+!<------------Create Webex Trustpoint------------->
+crypto pki trustpoint WebexCallingTP
+revocation-check crl
+!
+!
+!<------------Assign WebexCallingTP as default------------>
+sip-ua
+crypto signaling default trustpoint WebexCallingTP cn-san-validate server
+transport tcp tls v1.2
+tcp-retry 1000
+!
+!
+!<------------Get Webex Cert Bundle------------------->
+crypto pki trustpool import clean url http://www.cisco.com/security/pki/trs/ios_core.p7b
+!
+!
+!<----Add Webex Calling IPs to trust list ------>
+voice service voip
+!<--Current list of all WxC IPs Updated 2024-06-17-->
+ ip address trusted list
+ipv4 23.89.0.0 255.255.0.0
+ipv4 85.119.56.0 255.255.254.0
+ipv4 128.177.14.0 255.255.255.0
+ipv4 128.177.36.0 255.255.255.0
+ipv4 135.84.168.0 255.255.248.0
+ipv4 139.177.64.0 255.255.248.0
+ipv4 139.177.72.0 255.255.254.0
+ipv4 144.196.0.0 255.255.0.0
+ipv4 150.253.128.0 255.255.128.0
+ipv4 170.72.0.0 255.255.0.0
+ipv4 170.133.128.0 255.255.192.0
+ipv4 185.115.196.0 255.255.252.0
+ipv4 199.19.196.0 255.255.254.0
+ipv4 199.19.199.0 255.255.255.0
+ipv4 199.59.64.0 255.255.248.0
+!
+!
+allow-connections sip to sip
+media statistics
+media bulk-stats
+no supplementary-service sip refer
+no supplementary-service sip handle-replaces
+fax protocol t38 version 0 ls-redundancy 0 hs-redundancy 0 fallback none
+stun
+ stun flowdata agent-id 1 boot-count 4
+ !<-----Passoword ONLY used if FW opens STUN packets--->
+ stun flowdata shared-secret 0 Password123$
+sip
+ g729 annexb-all
+ early-offer forced
+ asymmetric payload full
+!
+!
+!!<--------Modify SIP Header for Webex Support--------->
+voice class sip-profiles 200
+ rule 9 request ANY sip-header SIP-Req-URI modify "sips:(.*)" "sip:\\1"
+ rule 10 request ANY sip-header To modify "<sips:(.*)" "<sip:\\1"
+ rule 11 request ANY sip-header From modify "<sips:(.*)" "<sip:\\1"
+ rule 12 request ANY sip-header Contact modify "<sips:(.*)>" "<sip:\\1;transport=tls>"
+ rule 13 response ANY sip-header To modify "<sips:(.*)" "<sip:\\1"
+ rule 14 response ANY sip-header From modify "<sips:(.*)" "<sip:\\1"
+ rule 15 response ANY sip-header Contact modify "<sips:(.*)" "<sip:\\1"
+ rule 20 request ANY sip-header From modify ">" ";otg=__OTG__>"
+ rule 30 request ANY sip-header P-Asserted-Identity modify "sips:(.*)" "sip:\\1"
+!
+!
+!<----- Prefer G711 for compatibility -------->
+voice class codec 99
+ codec preference 1 g711ulaw
+ codec preference 2 g711alaw
+!
+!
+!<---------WxC only supports SHA1_80 for LGW SRTP----------->
+voice class srtp-crypto 200
+crypto 1 AES_CM_128_HMAC_SHA1_80
+!
+!
+!<-------Use STUN to prevent no-way audio------------->
+voice class stun-usage 200
+ stun usage firewall-traversal flowdata
+ stun usage ice lite
+!
+!
+!<---Tenant Config for WxC Trunk Registration----->
+voice class tenant 200
+  registrar dns:__REGISTRAR__ scheme sips expires 240 refresh-ratio 50 tcp tls
+  credentials number __LINEPORT__ username __USERNAME__ password 0 __PASSWORD__ realm BroadWorks
+  authentication username __USERNAME__ password 0 __PASSWORD__ realm BroadWorks
+  authentication username __USERNAME__ password 0 __PASSWORD__ realm __REGISTRAR__
+  no remote-party-id
+  sip-server dns:__REGISTRAR__
+  connection-reuse
+  srtp-crypto 200
+  session transport tcp tls
+  url sips
+  error-passthru
+  asserted-id pai
+  bind control source-interface __WEBEXIFACE__
+  bind media source-interface __WEBEXIFACE__
+  no pass-thru content custom-sdp
+  sip-profiles 200
+  outbound-proxy dns:__PROXY__
+  privacy-policy passthru
+!
+!
+!<---------------Tenant Config for OUTBOUND to UCM----------->
+voice class tenant 100
+ session transport udp
+ url sip
+ error-passthru
+ bind control source-interface __CUCMIFACE__
+ bind media source-interface __CUCMIFACE__
+ no pass-thru content custom-sdp
+!
+!
+!<---------------Tenant Config for OUTBOUND to PSTN----------->
+voice class tenant 150
+ session transport udp
+ url sip
+ error-passthru
+ bind control source-interface __PSTNIFACE__
+ bind media source-interface __PSTNIFACE__
+ no pass-thru content custom-sdp
+!
+!
+!<---Tenant Config for INBOUND PSTN Trunk ----->
+voice class tenant 350
+bind control source-interface __PSTNIFACE__
+bind media source-interface __PSTNIFACE__
+no pass-thru content custom-sdp
+
+!<---Tenant Config for INBOUND UCM Trunk ----->
+voice class tenant 300
+bind control source-interface __CUCMIFACE__
+bind media source-interface __CUCMIFACE__
+no pass-thru content custom-sdp
+!
+!
+!<------ITSP host IP-------->
+voice class uri 100 sip
+  host ipv4:__PSTNIP__
+!
+!
+!<-------Identify Tilson LGW instance based on OTG/DTG Parm------->
+voice class uri 200 sip
+ pattern dtg=__OTG__>
+!
+!
+!<-------Identify UCM->WxC calls via singling port---->
+voice class uri 300 sip
+ pattern :5065
+!
+!
+!<-------UCM Server group for WxC Calls---------->
+voice class server-group 301
+ ipv4 __CUCMPUB__ port 5065
+ ipv4 __CUCMSUB__ port 5065
+!
+!
+!<-------UCM Server group for PSTN Calls---------->
+voice class server-group 305
+ ipv4 __CUCMPUB__ port 5060
+ ipv4 __CUCMSUB__ port 5060
+!
+!
+!<----Outbound dial-peer toward IP PSTN----->
+dial-peer voice 101 voip
+ description Outgoing dial-peer to IP PSTN
+ destination-pattern BAD.BAD
+ session protocol sipv2
+ session target ipv4:__PSTNIP__
+ voice-class codec 99
+ dtmf-relay rtp-nte
+ voice-class sip tenant 100
+ no vad
+!
+!
+!<------------UCM->WxC DP----------->
+dial-peer voice 200201 voip
+ description Inbound/Outbound Webex Calling
+ destination-pattern BAD.BAD
+ session protocol sipv2
+ session target sip-server
+ voice-class codec 99
+ dtmf-relay rtp-nte
+ voice-class stun-usage 200
+ no voice-class sip localhost
+ voice-class sip tenant 200
+ srtp
+ no vad
+!
+!
+!<---------OUTBOUND WxC->UCM DP------->
+dial-peer voice 301 voip
+ description OUTBOUND to UCM for WXC INBOUND
+ destination-pattern BAD.BAD
+ session protocol sipv2
+ session server-group 301
+ voice-class codec 99
+ dtmf-relay rtp-nte
+ voice-class sip tenant 100
+ no vad
+!
+!
+!<---------OUTBOUND PSTN-> UCM DP--------->
+dial-peer voice 305 voip
+ description OUTBOUND to UCM for PSTN INBOUND
+ destination-pattern BAD.BAD
+ session protocol sipv2
+ session server-group 305
+ voice-class codec 99
+ dtmf-relay rtp-nte
+ voice-class sip tenant 100
+ no vad
+!
+!
+!!! UCM-->LGW-->WxC !!!
+voice class dpg 200
+ dial-peer 200201 preference 1
+!
+!
+!!! WxC-->LGW-->UCM !!!
+voice class dpg 300
+dial-peer 301 preference 1
+!
+!
+!!! UCM-->LGW-->PSTN !!!
+voice class dpg 100
+dial-peer 101 preference 1
+!
+!
+!!! PSTN-->LGW-->UCM !!!
+voice class dpg 302
+dial-peer 305 preference 1
+!
+!
+!<--------INBOUND DP for PSTN Trunk------>
+dial-peer voice 100 voip
+ description INBOUND from PSTN
+ session protocol sipv2
+ destination dpg 302
+ incoming uri via 100
+ voice-class codec 99
+ dtmf-relay rtp-nte
+ voice-class sip tenant 350
+ no vad
+!
+!
+!<---Apply DPG and URI to WxC DP---->
+dial-peer voice 200201 voip
+description Inbound/Outbound Webex Calling
+max-conn 250
+destination dpg 300
+incoming uri request 200
+!
+!
+!<---INBOUND from UCM->WxC---->
+dial-peer voice 300 voip
+description INBOUND from UCM for WxC
+session protocol sipv2
+destination dpg 200
+incoming uri via 300
+voice-class codec 99
+dtmf-relay rtp-nte
+voice-class sip tenant 300
+no vad`;
+
+// Field definitions: { id, token, label }
+const FIELDS = [
+  // Section 00 - Initial Config
+  { id: 'hostname',      token: '__HOSTNAME__',      label: 'HOSTNAME' },
+  { id: 'domain-name',   token: '__DOMAIN_NAME__',   label: 'DOMAIN_NAME' },
+  { id: 'dns1',          token: '__DNS1__',           label: 'DNS1' },
+  { id: 'dns2',          token: '__DNS2__',           label: 'DNS2' },
+  { id: 'mgmt-iface',    token: '__MGMT_IFACE__',     label: 'MANAGEMENT_INTERFACE' },
+  { id: 'ip-address',    token: '__IP_ADDRESS__',     label: 'IP_ADDRESS' },
+  { id: 'subnet-mask',   token: '__SUBNET_MASK__',    label: 'SUBNET_MASK' },
+  { id: 'default-gw',    token: '__DEFAULT_GW__',     label: 'DEFAULT_GATEWAY' },
+  { id: 'route-ip',      token: '__ROUTE_IP__',       label: 'ROUTE_IP' },
+  { id: 'route-subnet',  token: '__ROUTE_SUBNET__',   label: 'ROUTE_SUBNET' },
+  { id: 'route-gw',      token: '__ROUTE_GW__',       label: 'ROUTE_GATEWAY' },
+  // Section 01 - Local Account
+  { id: 'cube-username', token: '__CUBE_USERNAME__',  label: 'CUBE_USERNAME' },
+  { id: 'secret',        token: '__SECRET__',         label: 'SECRET' },
+  // Section 02 - WxC Credentials
+  { id: 'username',      token: '__USERNAME__',       label: 'USERNAME' },
+  { id: 'password',      token: '__PASSWORD__',       label: 'PASSWORD' },
+  { id: 'line-port',     token: '__LINEPORT__',       label: 'LINE/PORT' },
+  { id: 'registrar',     token: '__REGISTRAR__',      label: 'REGISTRAR DOMAIN' },
+  // Section 03 - Trunk
+  { id: 'otg-dtg',       token: '__OTG__',            label: 'Trunk Group OTG/DTG' },
+  { id: 'outbound-proxy',token: '__PROXY__',          label: 'OUTBOUND PROXY ADDRESS' },
+  // Section 04 - Interfaces
+  { id: 'webex-iface',   token: '__WEBEXIFACE__',     label: 'WEBEX INTERFACE' },
+  { id: 'cucm-iface',    token: '__CUCMIFACE__',      label: 'CUCM INTERFACE' },
+  { id: 'pstn-iface',    token: '__PSTNIFACE__',      label: 'PSTN INTERFACE' },
+  // Section 05 - IPs
+  { id: 'pstn-ip',       token: '__PSTNIP__',         label: 'PSTN IP' },
+  { id: 'cucm-pub',      token: '__CUCMPUB__',        label: 'CUCM PUB' },
+  { id: 'cucm-sub',      token: '__CUCMSUB__',        label: 'CUCM SUB' },
+];
+
+const TOTAL = FIELDS.length;
+
+function updateProgress() {
+  let filled = 0;
+  FIELDS.forEach(f => {
+    const el = document.getElementById(f.id);
+    if (el && el.value.trim()) {
+      filled++;
+      el.classList.add('filled');
+    } else if (el) {
+      el.classList.remove('filled');
+    }
+  });
+  document.getElementById('progress-count').textContent = filled + ' / ' + TOTAL;
+  document.getElementById('progress-fill').style.width = ((filled / TOTAL) * 100) + '%';
+}
+
+FIELDS.forEach(f => {
+  const el = document.getElementById(f.id);
+  if (el) el.addEventListener('input', updateProgress);
+});
+
+function generateConfig() {
+  let result = TEMPLATE;
+  FIELDS.forEach(f => {
+    const val = document.getElementById(f.id).value.trim() || ('{{' + f.label + '}}');
+    result = result.split(f.token).join(val);
+  });
+  const box = document.getElementById('output-box');
+  box.textContent = result;
+  const sec = document.getElementById('output-section');
+  sec.classList.add('visible');
+  sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function clearForm() {
+  FIELDS.forEach(f => {
+    const el = document.getElementById(f.id);
+    if (el) { el.value = ''; el.classList.remove('filled'); }
+  });
+  document.getElementById('output-section').classList.remove('visible');
+  updateProgress();
+}
+
+function copyConfig() {
+  const text = document.getElementById('output-box').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  });
+}
+</script>
+</body>
+</html>
