@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VYTC LGW Config Generator</title>
+<title>VEYTEC LGW Config Generator</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -198,6 +198,15 @@
   }
   .btn-secondary:hover { border-color: var(--muted); color: var(--text); }
   .btn-copy {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    font-size: 12px;
+    padding: 8px 16px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .btn-download {
     background: transparent;
     color: var(--accent);
     border: 1px solid var(--accent);
@@ -498,7 +507,10 @@
     <button class="btn-primary" onclick="generateConfig()">⚡ Generate Config</button>
     <button class="btn-secondary" onclick="clearForm()">Clear All</button>
   </div>
-
+  <div class="output-actions">
+      <button class="btn-copy" onclick="copyOutput()">⎘ Copy to Clipboard</button>
+      <button class="btn-download" onclick="downloadOutput()">↓ Download .txt</button>
+    </div>
   <div class="output-section" id="output-section">
     <div class="output-header">
       <span class="output-title">✓ Generated Configuration</span>
